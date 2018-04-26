@@ -5,12 +5,9 @@ import (
 )
 
 type DB interface {
-	Find(sql string, args ...interface{}) ([]*record.ActiveRecord, error)
+	Find(sql string, args ...interface{}) (record.ActiveRecordList, error)
 	FindFirst(sql string, args ...interface{}) (*record.ActiveRecord, error)
-
 	Update(sql string, args ...interface{}) (int64, error)
-
 	Save(table string, rd *record.ActiveRecord) (bool, error)
-
 	Delete(table string, rd *record.ActiveRecord) (int64, error)
 }

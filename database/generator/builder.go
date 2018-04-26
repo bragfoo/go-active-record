@@ -154,7 +154,6 @@ func getPath(targetPackage string) string {
 	if goPath == "" {
 		goPath = "~/go"
 	}
-	os.Remove(path)
 	os.MkdirAll(path, 0755)
 	return path
 }

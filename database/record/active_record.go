@@ -23,7 +23,7 @@ func (rds ActiveRecordList) Format(s fmt.State, verb rune) {
 				fmt.Fprintf(&buf, "{")
 				j := 0
 				for k, v := range rd.rows {
-					fmt.Fprintf(&buf, "\n  %s:%s", k, string((*v)[:]))
+					fmt.Fprintf(&buf, "\n  %s:%s", k, string((v)[:]))
 					if j++; j < len(rd.rows) {
 						fmt.Fprintf(&buf, ",")
 					}
@@ -47,7 +47,7 @@ func (rds ActiveRecordList) Format(s fmt.State, verb rune) {
 			fmt.Fprintf(&buf, "{")
 			j := 0
 			for k, v := range rd.rows {
-				fmt.Fprintf(&buf, "%s:%s", k, string((*v)[:]))
+				fmt.Fprintf(&buf, "%s:%s", k, string((v)[:]))
 				if j++; j < len(rd.rows) {
 					fmt.Fprintf(&buf, ",")
 				}
@@ -64,7 +64,7 @@ func (rds ActiveRecordList) Format(s fmt.State, verb rune) {
 
 type ActiveRecord struct {
 	table *[]string
-	rows  map[string]*sql.RawBytes
+	rows  map[string][]byte
 }
 
 func GetActiveRecordList(rows *sql.Rows) (ActiveRecordList, error) {
@@ -87,7 +87,7 @@ func GetActiveRecord(rows *sql.Rows) (*ActiveRecord, error) {
 	if rows.Next() {
 		return parse(rows)
 	}
-	return &ActiveRecord{&[]string{}, map[string]*sql.RawBytes{}}, nil
+	return &ActiveRecord{&[]string{}, map[string][]byte{}}, nil
 }
 
 func parse(rows *sql.Rows) (*ActiveRecord, error) {
@@ -100,10 +100,12 @@ func parse(rows *sql.Rows) (*ActiveRecord, error) {
 	rows.Scan(raw...)
 	rd := &ActiveRecord{
 		table: &table,
-		rows:  make(map[string]*sql.RawBytes),
+		rows:  make(map[string][]byte),
 	}
 	for i := 0; i < lenCN; i++ {
-		rd.rows[strings.ToLower(table[i])] = raw[i].(*sql.RawBytes)
+		var buf bytes.Buffer
+		buf.Write(*raw[i].(*sql.RawBytes))
+		rd.rows[strings.ToLower(table[i])] = buf.Bytes()
 	}
 	return rd, nil
 }
@@ -125,7 +127,7 @@ func (rd *ActiveRecord) Get(colName string) (string,
 	if !ok {
 		return "", &errorActiveRecord{ErrColNotFind, colName, ""}
 	} else {
-		result := string((*value)[:])
+		result := string((value)[:])
 		return result, nil
 	}
 }
@@ -146,13 +148,12 @@ func (rd *ActiveRecord) GetInt(colName string) (int, error) {
 	return v, nil
 }
 
-
 func (rd *ActiveRecord) GetInt64(colName string) (int64, error) {
 	value, err := rd.Get(colName)
 	if err != nil {
 		return 0, err
 	}
-	v, err := strconv.ParseInt(value,10,64)
+	v, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
 		return 0, &errorActiveRecord{ErrValueConvert, colName, "int"}
 	}
@@ -165,7 +166,7 @@ func (rd *ActiveRecord) Format(s fmt.State, verb rune) {
 		if s.Flag('+') {
 			var buf bytes.Buffer
 			for k, v := range rd.rows {
-				fmt.Fprintf(&buf, "%s:  %s,\n", k, string((*v)[:]))
+				fmt.Fprintf(&buf, "%s:  %s,\n", k, string((v)[:]))
 			}
 			io.WriteString(s, buf.String())
 			return
@@ -175,7 +176,7 @@ func (rd *ActiveRecord) Format(s fmt.State, verb rune) {
 	case 's', 'q':
 		var buf bytes.Buffer
 		for k, v := range rd.rows {
-			fmt.Fprintf(&buf, "%s:%s,", k, string((*v)[:]))
+			fmt.Fprintf(&buf, "%s:%s,", k, string((v)[:]))
 		}
 		io.WriteString(s, buf.String())
 	}
