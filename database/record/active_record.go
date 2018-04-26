@@ -146,6 +146,19 @@ func (rd *ActiveRecord) GetInt(colName string) (int, error) {
 	return v, nil
 }
 
+
+func (rd *ActiveRecord) GetInt64(colName string) (int64, error) {
+	value, err := rd.Get(colName)
+	if err != nil {
+		return 0, err
+	}
+	v, err := strconv.ParseInt(value,10,64)
+	if err != nil {
+		return 0, &errorActiveRecord{ErrValueConvert, colName, "int"}
+	}
+	return v, nil
+}
+
 func (rd *ActiveRecord) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':

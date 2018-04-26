@@ -14,10 +14,11 @@ import (
 )
 
 type col struct {
-	Table   string
-	Filed   string
-	ColName string
-	ColType string
+	Table      string
+	Filed      string
+	ColName    string
+	ColType    string
+	ReturnType string
 }
 type dbData struct {
 	Pkg    string
@@ -73,7 +74,7 @@ func (t *{{.BTable}}) Delete(rd *{{.BTable}}Rd) (int64, error) {
 }
 
 {{range .Cols}}
-func (rd *{{.Table}}Rd) Get{{.ColName}}() (int, error) {
+func (rd *{{.Table}}Rd) Get{{.ColName}}() ({{.ReturnType}}, error) {
 	return rd.Get{{.ColType}}("{{.Filed}}")
 }
 {{end}}
@@ -197,6 +198,7 @@ func parseCol(colRds record.ActiveRecordList, table string) []*col {
 			colName,
 			formatName(colName, true),
 			formatType(colType),
+			strings.ToLower(formatType(colType)),
 		}
 	}
 	return cols
