@@ -73,7 +73,7 @@ func (t *{{.BTable}}) Delete(rd *{{.BTable}}Rd) (int64, error) {
 }
 
 {{range .Cols}}
-func (rd *{{.Table}}Rd) Get{{.ColName}}}() (int, error) {
+func (rd *{{.Table}}Rd) Get{{.ColName}}() (int, error) {
 	return rd.Get{{.ColType}}("{{.Filed}}")
 }
 {{end}}
@@ -94,7 +94,7 @@ func main() {
 		"target package")
 	flag.StringVar(&dbHost, "db_host", "localhost", "db server ip or hostname")
 	flag.IntVar(&dbPort, "db_port", 3306, "db port")
-	flag.StringVar(&dbName, "db_name", "test", "db name")
+	flag.StringVar(&dbName, "db_name", "confman", "db name")
 	flag.StringVar(&dbUser, "db_user", "root", "db user")
 	flag.StringVar(&dbPwd, "db_pwd", "", "db password")
 	flag.Parse()
@@ -123,10 +123,12 @@ func main() {
 		cols := parseCol(colRds, table)
 
 		w := newWriter(filePath)
+		pkgs := strings.Split(targetPackage, "/")
+		pkg := pkgs[len(pkgs)-1]
 
 		tmpl, err := template.New("db").Parse(dbTemplate)
 		tmpl.Execute(w, &dbData{
-			targetPackage,
+			pkg,
 			bTableName,
 			sTableName,
 			cols,
@@ -191,7 +193,7 @@ func parseCol(colRds record.ActiveRecordList, table string) []*col {
 		fck(err)
 		colType, err := colRd.GetString("type")
 		cols[i] = &col{
-			table,
+			formatName(table, true),
 			colName,
 			formatName(colName, true),
 			formatType(colType),
