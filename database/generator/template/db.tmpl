@@ -1,0 +1,51 @@
+package {{.Pkg}}
+
+import (
+	"gitlab.mobvoi.com/infrastructure/river/middleware/database/record"
+	"gitlab.mobvoi.com/infrastructure/river/middleware/database/mysql"
+)
+
+type {{.BTable}}RdList []*{{.BTable}}Rd
+
+type {{.BTable}}Rd struct {
+	record.ActiveRecord
+}
+
+type {{.BTable}} struct {
+	db *mysql.DB
+}
+
+func (t *{{.BTable}}) Find(sql string, args ...interface{}) ({{.BTable}}RdList,
+	error) {
+	rds, err := t.db.Find(sql, args...)
+	{{.STable}}Rds := make([]*{{.BTable}}Rd, len(rds))
+	for i, rd := range rds {
+		{{.STable}}Rds[i] = &{{.BTable}}Rd{*rd}
+	}
+	return {{.STable}}Rds, err
+}
+
+func (t *{{.BTable}}) FindFirst(sql string, args ...interface{}) (*{{.BTable}}Rd,
+	error) {
+	rd, err := t.db.FindFirst(sql, args...)
+	return &{{.BTable}}Rd{*rd}, err
+
+}
+
+func (t *{{.BTable}}) Update(sql string, args ...interface{}) (int64, error) {
+	return t.db.Update(sql, args)
+}
+
+func (t *{{.BTable}}) Save(rd *{{.BTable}}Rd) (bool, error) {
+	return t.db.Save("{{.STable}}", &rd.ActiveRecord)
+}
+
+func (t *{{.BTable}}) Delete(rd *{{.BTable}}Rd) (int64, error) {
+	return t.db.Delete("{{.STable}}", &rd.ActiveRecord)
+}
+
+{{range .Cols}}
+func (rd *{{.Table}}Rd) Get{{.ColName}}}() (int, error) {
+	return rd.Get{{.ColType}}("{{.Filed}}")
+}
+{{end}}
