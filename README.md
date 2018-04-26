@@ -1,0 +1,1 @@
+# go-active-record
