@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"flag"
 
-	_ "github.com/go-sql-driver/mysql"
 	"text/template"
 	"bufio"
 	"os"
@@ -47,6 +46,9 @@ type {{.BTable}} struct {
 func (t *{{.BTable}}) Find(sql string, args ...interface{}) ({{.BTable}}RdList,
 	error) {
 	rds, err := t.db.Find(sql, args...)
+	if err != nil {
+		return nil, err
+	}
 	{{.STable}}Rds := make([]*{{.BTable}}Rd, len(rds))
 	for i, rd := range rds {
 		{{.STable}}Rds[i] = &{{.BTable}}Rd{*rd}
@@ -57,6 +59,9 @@ func (t *{{.BTable}}) Find(sql string, args ...interface{}) ({{.BTable}}RdList,
 func (t *{{.BTable}}) FindFirst(sql string, args ...interface{}) (*{{.BTable}}Rd,
 	error) {
 	rd, err := t.db.FindFirst(sql, args...)
+	if err != nil {
+		return nil, err
+	}
 	return &{{.BTable}}Rd{*rd}, err
 
 }
@@ -103,6 +108,7 @@ func main() {
 	db := new(mysql.DB)
 	err := db.Init(dbUser, dbPwd, dbHost, dbName, dbPort)
 	fck(err)
+	defer db.Close()
 
 	tableRds, err := db.Find("show tables")
 	fck(err)

@@ -52,11 +52,10 @@ func (db *DB) Find(sql string, args ...interface{}) (record.ActiveRecordList,
 func (db *DB) FindFirst(sql string, args ...interface{}) (*record.ActiveRecord,
 	error) {
 	rows, err := db.dbcp.Query(fmt.Sprintf("%s limit 1", sql), args...)
-	defer rows.Close()
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, err
 	}
+	defer rows.Close()
 	return record.GetActiveRecord(rows)
 }
 
@@ -85,7 +84,9 @@ func (db *DB) Save(table string, rd *record.ActiveRecord) (bool, error) {
 func (db *DB) Delete(table string, rd *record.ActiveRecord) (int64, error) {
 	return -1, nil
 }
-
+func (db *DB) Stat() sql.DBStats {
+	return db.dbcp.Stats()
+}
 func (db *DB) Close() (error) {
 	return db.dbcp.Close()
 }
