@@ -90,7 +90,7 @@ func main() {
 	)
 
 	flag.StringVar(&targetPackage, "target_package",
-		"github.com/bragfoo/go-active-record/",
+		"github.com/bragfoo/go-active-record/target",
 		"target package")
 	flag.StringVar(&dbHost, "db_host", "localhost", "db server ip or hostname")
 	flag.IntVar(&dbPort, "db_port", 3306, "db port")
