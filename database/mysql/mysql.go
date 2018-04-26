@@ -40,6 +40,7 @@ func (db *DB) NewDB(user, passwd, host, dbName string, port int) (*sql.DB,
 func (db *DB) Find(sql string, args ...interface{}) (record.ActiveRecordList,
 	error) {
 	rows, err := db.dbcp.Query(sql, args...)
+	defer rows.Close()
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
@@ -51,6 +52,7 @@ func (db *DB) Find(sql string, args ...interface{}) (record.ActiveRecordList,
 func (db *DB) FindFirst(sql string, args ...interface{}) (*record.ActiveRecord,
 	error) {
 	rows, err := db.dbcp.Query(fmt.Sprintf("%s limit 1", sql), args...)
+	defer rows.Close()
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil, err
@@ -60,6 +62,7 @@ func (db *DB) FindFirst(sql string, args ...interface{}) (*record.ActiveRecord,
 
 func (db *DB) Update(sql string, args ...interface{}) (int64, error) {
 	stmt, err := db.dbcp.Prepare(sql)
+	defer stmt.Close()
 	if err != nil {
 		return -1, err
 	}

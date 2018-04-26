@@ -114,7 +114,7 @@ func main() {
 		fck(err)
 
 		filePath := path + "/" + table + ".go"
-		fmt.Printf("gen %s and write file to %s", table, filePath)
+		fmt.Printf("gen %s and write file to %s\n", table, filePath)
 
 		colRds, err := db.Find(fmt.Sprintf("desc %s", table))
 		fck(err)
