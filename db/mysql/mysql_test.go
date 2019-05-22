@@ -6,7 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func TestInit(t *testing.T) {
+func TestNew(t *testing.T) {
 	type args struct {
 		user   string
 		passwd string
@@ -25,26 +25,24 @@ func TestInit(t *testing.T) {
 				"root",
 				"",
 				"localhost",
-				"port_store",
+				"test",
 				3306,
 			},
 			false,
 		},
 	}
-	db := new(DB)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := db.Init(tt.args.user, tt.args.passwd, tt.args.host,
+			if got, err := New(tt.args.user, tt.args.passwd, tt.args.host,
 				tt.args.db, tt.args.port); (err != nil) != tt.wantErr {
-				t.Errorf("Init() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Init() got Close = %v, error = %v, wantErr %v", err, got.Close(), tt.wantErr)
 			}
 		})
 	}
 }
 
 func TestDBMysql_Find(t *testing.T) {
-	db := new(DB)
-	db.Init("root", "", "127.0.0.1", "port_store", 3306)
+	db, _ := New("root", "", "127.0.0.1", "test", 3306)
 	type args struct {
 		sql  string
 		args []interface{}
@@ -57,7 +55,7 @@ func TestDBMysql_Find(t *testing.T) {
 		{
 			"A",
 			args{
-				sql:  "select * from pool",
+				sql:  "select * from pools",
 				args: []interface{}{},
 			},
 			false,
@@ -65,7 +63,7 @@ func TestDBMysql_Find(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := db.Find(tt.args.sql, tt.args.args...)
+			got, err := db.Query(tt.args.sql, tt.args.args...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DB.Find() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -78,8 +76,7 @@ func TestDBMysql_Find(t *testing.T) {
 }
 
 func TestDBMysql_FindFirst(t *testing.T) {
-	db := new(DB)
-	db.Init("root", "", "127.0.0.1", "port_store", 3306)
+	db, _ := New("root", "", "127.0.0.1", "test", 3306)
 	type args struct {
 		sql  string
 		args []interface{}
@@ -92,7 +89,7 @@ func TestDBMysql_FindFirst(t *testing.T) {
 		{
 			"A",
 			args{
-				sql:  "select * from pool",
+				sql:  "select * from pools",
 				args: []interface{}{},
 			},
 			false,
@@ -100,7 +97,7 @@ func TestDBMysql_FindFirst(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := db.FindFirst(tt.args.sql, tt.args.args...)
+			got, err := db.QueryFirst(tt.args.sql, tt.args.args...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DB.FindFirst() error = %v, wantErr %v", err, tt.wantErr)
 				return
